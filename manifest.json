@@ -1,0 +1,10 @@
+{
+  "name": "Segunda-feira — Assistente pessoal",
+  "short_name": "Segunda-feira",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#0b1220",
+  "theme_color": "#101827",
+  "description": "Protótipo da assistente pessoal Segunda-feira.",
+  "icons": []
+}

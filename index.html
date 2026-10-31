@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#101827">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Segunda-feira">
+<link rel="manifest" href="manifest.json">
+<title>Segunda-feira</title>
+<style>
+:root{color-scheme:dark;--bg:#0b1220;--panel:#111d30;--blue:#75b7ff;--muted:#a9bad0}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at 50% 15%,#1b3455 0%,#0b1220 55%);color:#f4f8ff;font:16px -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;min-height:100vh}
+main{max-width:620px;margin:auto;min-height:100vh;padding:calc(22px + env(safe-area-inset-top)) 18px calc(24px + env(safe-area-inset-bottom));display:flex;flex-direction:column}
+header{display:flex;justify-content:space-between;align-items:center}.brand{font-weight:750;letter-spacing:.12em;font-size:13px}.status{font-size:12px;color:#a9d8b6}
+.hero{text-align:center;padding:42px 0 24px}.orb{width:116px;height:116px;border-radius:50%;margin:0 auto 22px;border:2px solid #75b7ff;display:grid;place-items:center;background:radial-gradient(circle,#315b8b,#142844 70%);box-shadow:0 0 45px #397dc455,inset 0 0 25px #8bc7ff33}
+.orb span{font-size:42px}.hero h1{font-size:30px;margin:0 0 8px}.hero p{color:var(--muted);margin:0}
+#chat{flex:1;display:flex;flex-direction:column;gap:12px;padding:12px 0 20px;overflow:auto}
+.msg{padding:13px 15px;border-radius:17px;max-width:88%;line-height:1.45;white-space:pre-wrap}.assistant{background:#15263c;border:1px solid #29415f;align-self:flex-start}.user{background:#244b78;align-self:flex-end}
+.controls{background:#101d30;border:1px solid #263c58;border-radius:22px;padding:13px;display:flex;gap:9px;align-items:center}
+input{min-width:0;flex:1;background:transparent;border:0;outline:0;color:white;font-size:16px;padding:10px}
+button{border:0;color:white;cursor:pointer;font-size:15px}.send{background:#315f91;border-radius:14px;padding:12px 15px}.mic{width:62px;height:62px;border-radius:50%;background:linear-gradient(145deg,#3978b7,#1e426b);font-size:25px;box-shadow:0 5px 24px #397dc444;margin:14px auto 7px;display:block}.mic.listening{background:#a34255;animation:pulse 1.2s infinite}
+@keyframes pulse{50%{box-shadow:0 0 0 12px #a3425522}}
+.hint{text-align:center;color:#8fa5bf;font-size:12px;margin:0 0 12px}.notice{font-size:12px;color:#8fa5bf;text-align:center;line-height:1.5;margin-top:12px}
+</style>
+</head>
+<body>
+<main>
+<header><div class="brand">✦ SEGUNDA-FEIRA</div><div class="status">● SISTEMA INICIAL</div></header>
+<section class="hero">
+<div class="orb"><span>◉</span></div>
+<h1>Olá, Thiago.</h1><p>Estou pronta para conversar com você.</p>
+</section>
+<section id="chat" aria-live="polite">
+<div class="msg assistant">Olá, Thiago. Sou a Segunda-feira. Minha interface está pronta. Para conversar com uma IA de verdade, ainda precisamos conectar o cérebro do sistema. Enquanto isso, você pode testar a interface e a leitura em voz alta.</div>
+</section>
+<form class="controls" id="form"><input id="message" autocomplete="off" placeholder="Digite sua mensagem..." aria-label="Sua mensagem"><button class="send" type="submit">Enviar</button></form>
+<button class="mic" id="mic" aria-label="Falar">🎙</button>
+<p class="hint" id="hint">Toque no microfone para testar a entrada de voz, se disponível.</p>
+<p class="notice">Protótipo inicial • Ainda não conectado a um serviço de IA • Nenhuma mensagem é enviada para servidores.</p>
+</main>
+<script>
+const chat=document.querySelector('#chat'),form=document.querySelector('#form'),input=document.querySelector('#message'),mic=document.querySelector('#mic'),hint=document.querySelector('#hint');
+function add(text,who){const el=document.createElement('div');el.className='msg '+who;el.textContent=text;chat.appendChild(el);chat.scrollTop=chat.scrollHeight;return el}
+function speak(text){if(!('speechSynthesis'in window)){hint.textContent='Leitura em voz alta não está disponível neste navegador.';return}speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(text);u.lang='pt-BR';u.rate=0.96;u.pitch=1.08;const voices=speechSynthesis.getVoices();const v=voices.find(x=>x.lang.toLowerCase().startsWith('pt-br')&&/female|femin|luciana|fernanda/i.test(x.name))||voices.find(x=>x.lang.toLowerCase().startsWith('pt-br'));if(v)u.voice=v;speechSynthesis.speak(u)}
+form.addEventListener('submit',e=>{e.preventDefault();const text=input.value.trim();if(!text)return;add(text,'user');input.value='';const reply='Recebi sua mensagem, Thiago. Minha conexão com um modelo de inteligência artificial ainda precisa ser configurada. Esta versão é o primeiro protótipo da minha interface.';add(reply,'assistant');speak(reply)});
+const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+if(SR){const rec=new SR();rec.lang='pt-BR';rec.interimResults=false;rec.onstart=()=>{mic.classList.add('listening');hint.textContent='Estou ouvindo...'};rec.onend=()=>{mic.classList.remove('listening');hint.textContent='Toque no microfone para falar.'};rec.onresult=e=>{input.value=e.results[0][0].transcript;form.requestSubmit()};rec.onerror=()=>{hint.textContent='Não consegui acessar o reconhecimento de voz. Você pode digitar.'};mic.addEventListener('click',()=>{try{rec.start()}catch(e){hint.textContent='O microfone já está ativo.'}})}else{mic.addEventListener('click',()=>{hint.textContent='Este navegador não oferece reconhecimento de voz nesta página. Use a digitação por enquanto.'})}
+if('serviceWorker'in navigator && location.protocol.startsWith('http'))navigator.serviceWorker.register('./sw.js').catch(()=>{});
+</script>
+</body></html>
